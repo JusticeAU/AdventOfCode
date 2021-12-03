@@ -80,3 +80,29 @@ function day_2_1(){
 	}
 show_debug_message(_depth * _distance);
 }
+
+function day_2_2(){
+	_depth = 0;
+	_distance = 0;
+	_aim = 0;
+	
+	for (var i = 0; i < array_length(input2); i++)
+	{
+		switch(input2[i][0]){
+			case "forward":
+				_distance += input2[i][1];
+				_depth += real(_aim) * real(input2[i][1]);
+				break;
+			case "down":
+				_aim += input2[i][1];
+				break;
+			case "up":
+				_aim -= input2[i][1];
+				break;
+			
+			show_debug_message(_aim);
+		}
+	}
+
+show_debug_message(_depth * _distance);
+}

@@ -274,7 +274,7 @@ function process(_array, _column, _most_common,_o2=true){
 
 function load_input_day_4(_path){
 	
-	bingoNumbers = []; //array for bing numbers
+	bingoNumbers = []; //array for bingo numbers
 	file = file_text_open_read(_path)
 	
 	//read the bingo numbers from the first line of the file
@@ -299,8 +299,8 @@ function load_input_day_4(_path){
 		}
 	}
 	
-	show_debug_message(file_text_readln(file)); //next line
-	show_debug_message(file_text_readln(file)); //skip over blank.
+	file_text_readln(file); //next line
+	file_text_readln(file); //skip over blank.
 	
 	//begin reading bingo boards
 	bingoBoards = [];

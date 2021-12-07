@@ -322,3 +322,135 @@ function load_input_day_4(_path){
 	until(file_text_eof(file))
 	file_text_close(file);
 }
+
+function day_4_1(){
+	var gameEnded = false;
+	var winningNumber = 0;
+	var winningBoard = 0;
+	//loop through bingo numbers
+	for (var bingoNumber = 0; bingoNumber < array_length(bingoNumbers); bingoNumber++){
+		show_debug_message("Bingo Number: " + string(bingoNumbers[bingoNumber]));
+		//loop through bingo boards
+		for (var _boardIndex = 0; _boardIndex < array_length(bingoBoards); _boardIndex++){
+			for (var _y = 0; _y < array_length(bingoBoards[_boardIndex]); _y++){
+				for (var _x = 0; _x < array_length(bingoBoards[_boardIndex][_y]); _x++){
+					if (bingoNumbers[bingoNumber] == bingoBoards[_boardIndex][_y][_x]){
+						show_debug_message("ITS A BINGO!!!!!");
+						show_debug_message("Board Number: " + string(_boardIndex));
+						show_debug_message("Row Number: " + string(_y));
+						show_debug_message("Column Number: " + string(_x));
+						show_debug_message("Number: " + string(bingoBoards[_boardIndex][_y][_x]));
+						bingoBoards[_boardIndex][_y][_x] = 0;
+						gameEnded = win_check(_boardIndex,_y,_x);
+					}
+					if (gameEnded) break;
+				}
+				if (gameEnded) break;
+			}
+			if (gameEnded) break;
+		}
+		if (gameEnded){
+			winningNumber = real(bingoNumbers[bingoNumber]);
+			winningBoard = _boardIndex;
+			break;
+		}
+	}
+	var boardSum = sum_board(_boardIndex);
+	show_debug_message(winningNumber * boardSum);
+}
+
+function day_4_2(){
+	wonBoards = [];
+	var gameEnded = false;
+	var winningNumber = 0;
+	var winningBoard = 0;
+	//loop through bingo numbers
+	for (var bingoNumber = 0; bingoNumber < array_length(bingoNumbers); bingoNumber++){
+			show_debug_message("Bingo Number: " + string(bingoNumbers[bingoNumber]));
+			//loop through bingo boards
+			for (var _boardIndex = 0; _boardIndex < array_length(bingoBoards); _boardIndex++){
+				gameEnded = false;
+				//check if a board has won already.
+				var won = false;
+				for (var wonNumber = 0; wonNumber < array_length(wonBoards); wonNumber++){
+					if (wonBoards[wonNumber] == _boardIndex){
+						show_debug_message("board already won: " + string(_boardIndex));
+						won = true;
+						break;
+					}
+				}
+				if (!won){
+					for (var _y = 0; _y < array_length(bingoBoards[_boardIndex]); _y++){
+						for (var _x = 0; _x < array_length(bingoBoards[_boardIndex][_y]); _x++){
+							if (bingoNumbers[bingoNumber] == bingoBoards[_boardIndex][_y][_x]){
+								//show_debug_message("ITS A BINGO!!!!!");
+								//show_debug_message("Board Number: " + string(_boardIndex));
+								//show_debug_message("Row Number: " + string(_y));
+								//show_debug_message("Column Number: " + string(_x));
+								//show_debug_message("Number: " + string(bingoBoards[_boardIndex][_y][_x]));
+								bingoBoards[_boardIndex][_y][_x] = 0;
+								gameEnded = win_check(_boardIndex,_y,_x);
+							}
+							if (gameEnded) break;
+						}
+						if (gameEnded) break;
+					}
+					if (gameEnded){
+						array_push(wonBoards,_boardIndex);
+						lastWon = _boardIndex;
+						lastWinningNum = real(bingoNumbers[bingoNumber]);
+					}
+				}
+			}
+		}
+	var boardSum = sum_board(lastWon);
+	show_debug_message(lastWinningNum * boardSum);
+	show_debug_message(lastWinningNum);
+}
+
+function win_check(_boardIndex,_y,_x){
+	//check horizontal
+	var h = 0;
+	for (var i = 0; i < 5; i++){
+		h += bingoBoards[_boardIndex][_y][i];
+	}
+	if (h == 0){
+		show_debug_message("Board has been won");
+		show_debug_message(_boardIndex);
+		
+		return true;
+	}
+	//check vertical
+	var v = 0;
+	for (var i = 0; i < 5; i++){
+		v += bingoBoards[_boardIndex][i][_x];
+	}
+	if (v == 0){
+		show_debug_message("Board has been won");
+		show_debug_message(_boardIndex);
+		return true;
+	}
+}
+	
+function sum_board(_boardIndex){
+	var _sum = 0;
+	for (var _y = 0; _y < array_length(bingoBoards[_boardIndex]); _y++){
+		for (var _x = 0; _x < array_length(bingoBoards[_boardIndex][_y]); _x++){
+			_sum += bingoBoards[_boardIndex][_y][_x];
+		}
+	}
+	return _sum;
+}
+
+function isOneBoardLeft(){
+	var wins = 0;
+	var notWon = -4;
+	for (var i = 0; i < array_length(bingoBoards); i++){
+		if (bingoBoards[i][0][0] == -1) wins++;
+		else notWon = i;
+	}
+	show_debug_message("Wins:" + string(wins));
+	if wins < 99 return false;
+	else return -1;
+	
+}

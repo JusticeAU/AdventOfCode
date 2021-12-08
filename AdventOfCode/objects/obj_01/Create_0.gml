@@ -600,3 +600,117 @@ function line_orientation(lineIndex){
 	else if (coordinates[lineIndex][y1] == coordinates[lineIndex][y2]) return "horizontal";
 	else return "diagonal";
 }
+	
+function load_input_day_6(_path){
+	var file = file_text_open_read(_path);
+	var str = file_text_read_string(file);
+	var num = "";
+	fishes[8] = 0;
+	for (var i = 1; i-1 <= string_length(str); i++){ //loop through each character and run through below interpreter
+		var char = string_char_at(str,i)
+		switch(char){
+			case ",": //end fish
+				show_debug_message(num);
+				fishes[real(num)] += 1;
+				num = "";
+				break;
+			case "": //end of line/file
+				show_debug_message(num);
+				fishes[real(num)] += 1;
+				num = "";
+				break;
+			default: //has to be a char
+				num += char;
+		}
+	}
+
+	
+}
+	
+function day_6_1(_days){
+	repeat(_days){
+		var newFish = 0;
+		for (var i = 0; i < array_length(fishes); i++){
+			switch (i){
+				case 0:
+					newFish = fishes[0];
+					break;
+				default:
+					fishes[i-1] = fishes[i];
+					break;
+			}
+		}
+		fishes[6] += newFish;
+		fishes[8] = newFish;
+	}
+	
+	var totalFish = 0;
+	for (var i = 0; i < array_length(fishes); i++){
+		totalFish += fishes[i];
+	}
+	show_debug_message(totalFish)
+}
+	
+function load_input_day_7(_path){
+	var file = file_text_open_read(_path);
+	var str = file_text_read_string(file);
+	var num = "";
+	crabs = [];
+	for (var i = 1; i-1 <= string_length(str); i++){ //loop through each character and run through below interpreter
+		var char = string_char_at(str,i)
+		switch(char){
+			case ",": //end crab
+				array_push(crabs,real(num));
+				num = "";
+				break;
+			case "": //end of line/file
+				array_push(crabs,real(num));
+				num = "";
+				break;
+			default: //has to be a char
+				num += char;
+		}
+	}
+}
+	
+function day_7_1(){
+	//median
+	array_sort(crabs,true);
+	var _median = crabs[array_length(crabs)/2]
+	show_debug_message("median: " + string(_median));
+	var fuel_median = 0;
+	for (var i = 0; i < array_length(crabs); i++){
+		fuel_median += abs(_median - crabs[i]);
+	}
+	show_debug_message("fuel median: " + string(fuel_median));
+}
+
+function day_7_2(){
+	//part2
+	//find largest offset
+	_max = 0;
+	for (var i = 0; i < array_length(crabs); i++){
+		_max = max(_max, crabs[i]);
+	}
+	//loop through all possibly positions
+	_movement = 999999999999;
+	_best_pos = 0;
+	for (var i = 0; i <= _max; i++){ //for each potential position
+		var _fuel_cost = 0;
+		for (var j = 0; j < array_length(crabs); j++){ // test against all crabs
+			var _distance = abs(i - crabs[j])
+			/*for (var k = 1; k <= _distance; k++){
+				_fuel_cost += k;
+			}*/
+			
+			 _fuel_cost += (power(_distance,2) + _distance) / 2;
+		}
+		if (_fuel_cost < _movement){
+			_movement = _fuel_cost;
+			_best_pos = i;
+		}
+	}
+	show_debug_message("Best position: " + string(_best_pos));
+	show_debug_message("fuel cost: " + string(_movement));
+	
+}

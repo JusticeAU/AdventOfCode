@@ -8,6 +8,9 @@
 //load_input_day_3("C:\\dev\\AdventOfCode\\day3.txt");
 //day_3_1();
 //day_3_2();
-load_input_day_4("C:\\dev\\AdventOfCode\\day4.txt");
+//load_input_day_4("C:\\dev\\AdventOfCode\\day4.txt");
 //day_4_1();
-day_4_2();
+//day_4_2();
+load_input_day_5("C:\\dev\\AdventOfCode\\day5.txt");
+//day_5_1();
+day_5_2();

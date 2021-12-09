@@ -16,7 +16,9 @@
 //day_5_2();
 //load_input_day_6("C:\\dev\\AdventOfCode\\day6.txt");
 //day_6_1(256);
-load_input_day_7("C:\\dev\\AdventOfCode\\day7.txt");
+//load_input_day_7("C:\\dev\\AdventOfCode\\day7.txt");
 //day_7_1();
-day_7_2();
-
+//day_7_2();
+load_input_day_8("C:\\dev\\AdventOfCode\\day8.txt");
+//day_8_1();
+day_8_2();

@@ -1,6 +1,5 @@
 /// @description 
 function load_input_day_10(_path){
-	//read in file to array
 	input = [];
 	file = file_text_open_read(_path)
 	for(var i = 0; (!file_text_eof(file)); i++) {
@@ -13,14 +12,12 @@ function load_input_day_10(_path){
 function day_10_1(){
 	_score1 = 0;
 	_score2 = [];
-	//_lineIndex = 0;
 	for (var _lineIndex = 0; _lineIndex < array_length(input); _lineIndex++){
 		_depth = 0;
 		brackets = [];
 		var ok = true;
 		for (var _charIndex = 1; _charIndex <= string_length(input[_lineIndex]); _charIndex++){
 			var _char = string_char_at(input[_lineIndex], _charIndex);
-			//show_debug_message(_char);
 			switch(_char){
 				case "(":
 					open(_char);
@@ -49,16 +46,10 @@ function day_10_1(){
 					break;
 			
 				default: break;
-			
 			}
-		
 			if !ok break; //invalid char
 		}
-		if !ok{ //corrupted line
-			array_delete(input,_lineIndex,1);
-			_lineIndex--;
-		}
-		else{ //valid line - potentially needs completion
+		if ok{ //valid line - potentially needs completion
 			var _lineScore = 0;
 			
 			for (var i = array_length(brackets)-1; i >= 0; i--){

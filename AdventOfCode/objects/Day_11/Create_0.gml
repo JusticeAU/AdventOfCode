@@ -67,7 +67,7 @@ function day_11(){
 		}
 		if(iterations == 100) show_debug_message("Part 1: " + string(flashes));
 	}
-	until(allFlashed = true);
+	until(allFlashed == true);
 	show_debug_message("Part 2: " + string(iterations));
 }
 

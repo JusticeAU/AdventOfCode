@@ -19,7 +19,9 @@ function load_input_day_14(_path){
 function day_14_1(_steps){
 	for (var step = 1; step <= _steps; step++){
 		insertions = [];
-		for (var pairIndex = 0; pairIndex < array_length(insertionRules); pairIndex++){ //error - should be pressing per par in string, not per pairlist index otherwise order of insertion gets messed up.
+		for (var pairIndex = 0; pairIndex < array_length(insertionRules); pairIndex++){
+			//error - should be pressing per par in string, not per pairlist index otherwise order of insertion gets messed up.
+			//OR every time i make an insertion at a position, process the remainder of my insertion list and increase positions only where the position is larger than the one we just inserted
 			var _matches = string_count(insertionRules[pairIndex][0],str);
 			show_debug_message(_matches);
 			var _lastMatchPos = 0;

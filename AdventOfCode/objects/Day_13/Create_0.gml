@@ -28,11 +28,55 @@ function load_input_day_13(_path){
 			var _coordinate = real(string_copy(_str,14,_end));
 			folds[i][0] = _foldType;
 			folds[i][1] = _coordinate;
-			
 		}
-		
 		file_text_readln(file);
 	}
 	file_text_close(file);
+}
 
+function fold(_foldAlong,_index){
+	switch(_foldAlong){
+		case "y":
+			for (var _y = _index; _y < array_length(paper); _y++){
+				for (var _x = 0; _x < array_length(paper[_y]); _x++){
+					if (paper[_y][_x]) paper[(_index*2)-_y][_x] = paper[_y][_x];
+				}
+			}
+			array_resize(paper,_index);
+			break;
+		case "x":
+			for (var _y = 0; _y < array_length(paper); _y++){
+				for (var _x = _index; _x < array_length(paper[_y]); _x++){
+					if (paper[_y][_x]) paper[_y][(_index*2)-_x] = paper[_y][_x];
+				}
+			}
+			for(var _y = 0; _y < array_length(paper); _y++) if(is_array(paper[_y])) array_resize(paper[_y],_index);
+			break;
+	}
+	
+}
+
+function day_13(){
+	for (var i = 0; i < array_length(folds); i++){
+		fold(folds[i][0], folds[i][1]);
+		if(i = 0){
+			var _dots = 0;
+			for (var _y = 0; _y < array_length(paper); _y++){
+				for (var _x = 0; _x < array_length(paper[_y]); _x++){
+					if (paper[_y][_x]) _dots++;
+				}
+			}
+		show_debug_message("Part 1: " + string(_dots));
+		}
+	}
+	show_debug_message("Part 2: ");
+	for (var _y = 0; _y < array_length(paper); _y++){
+		var _str = "";
+		for (var _x = 0; _x < array_length(paper[_y]); _x++){
+			if (paper[_y][_x]) _str += "▓";
+			else _str += "░";
+		}
+		show_debug_message(_str);
+		}
+		
 }

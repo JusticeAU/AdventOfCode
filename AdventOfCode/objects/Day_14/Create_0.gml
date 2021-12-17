@@ -4,69 +4,144 @@ function load_input_day_14(_path){
 	insertionRules = [];
 	file = file_text_open_read(_path);
 	str = file_text_read_string(file);
-	//add inital characters to charCount list
-	for (var i = 1; i <= string_length(str); i++){
-		count_character(string_char_at(str,i));
+	charMap = ds_map_create();
+	insertionMap = ds_map_create();	
+	
+	//add initial characters to charArray
+	var _strLength = string_length(str);
+	for (var i = 1; i <= _strLength; i++){
+		var _char = string_char_at(str,i);
+		if (i == _strLength) add_neighbor(_char,"EOL", 1);
+		else{
+			var _neighbor = string_char_at(str,i+1);
+			add_neighbor(_char,_neighbor, 1);
+		}
 	}
 	file_text_readln(file);
 	file_text_readln(file);
 	
+	//insertion rules
 	for(var i = 0; (!file_text_eof(file)); i++) {
+		//process line of string
 		var _str = file_text_read_string(file);
-		var _pair = string_copy(_str,1,2);
-		var _value = string_copy(_str,7,1);
-		array_push(insertionRules,[_pair,_value]);
-		file_text_readln(file);
+		var _charStr = string_char_at(_str,1);
+		var _neighborStr = string_char_at(_str,2);
+		var _insertStr = string_char_at(_str,7);
+		
+		//insert in to map
+		if (!ds_map_exists(insertionMap,_charStr)) ds_map_add(insertionMap,_charStr,ds_map_create());
+		var _char = insertionMap[? _charStr];
+		ds_map_add(_char, _neighborStr, _insertStr);
+		
+		file_text_readln(file); //next line
 	}
 	file_text_close(file);
 }
 
-function day_14_1(_steps){
+function add_char(_charStr){
+	if (!ds_map_exists(charMap,_charStr)) ds_map_add(charMap,_charStr,ds_map_create());
+}
+
+function add_neighbor(_charStr,_neighborStr, _qty){
+	add_char(_charStr);
+	var _char = charMap[? _charStr];
+	if(!ds_map_exists(_char, _neighborStr)) ds_map_add(_char, _neighborStr, _qty);
+	else _char[? _neighborStr] += _qty;
+}
 	
-	for (var step = 1; step <= _steps; step++){
-		show_debug_message("step: " + string(step));
+function add_insertion(_char,_neighbor,_insertion,_qty){
+	array_push(insertions,[_char,_neighbor,_insertion,_qty]);
+}
+
+function day_14(_steps){
+	insertions = [];
+	
+	//loop through steps
+	for (var _step = 1; _step <= _steps; _step++){
+		//build insertion list
+		//loop through charmap
+		var _charMapSize = ds_map_size(charMap);
+		var _char = ds_map_find_first(charMap);
+		repeat(_charMapSize){
+			//show_debug_message("Char: " + _char);
+			//loop through neighbors of char
+			var _charNeighborMapSize = ds_map_size(charMap[? _char])
+			var _neighbor = ds_map_find_first(charMap[? _char]);
+			repeat(_charNeighborMapSize){
+				//show_debug_message("Neighbor: " + _neighbor);
+				
+				//search if pair match
+				var _insert = insertionMap[? _char][? _neighbor];
+				var _quantity = charMap[? _char][? _neighbor];
+				array_push(insertions,[_char,_neighbor,_insert,_quantity]);
+				
+				//find next neighbor
+				_neighbor = ds_map_find_next(charMap[? _char], _neighbor);
+			}
+			
+			//find next char
+			_char = ds_map_find_next(charMap, _char);
+		}
+		
+		//process insertion list
+		for (var i = 0; i < array_length(insertions); i++){
+			process_insertion(insertions[i]);
+		}
+		
+		//clear for next step
 		insertions = [];
 		
-		//search string for pairs
-		for (var pairIndex = 0; pairIndex < array_length(insertionRules); pairIndex++){
-			//error - should be processing per pair in string, not per pairlist item otherwise order of insertion wont be valid
-			//OR every time i make an insertion at a position, process the remainder of my insertion list and increase positions only where the position is larger than the one we just inserted
-			var _matches = string_count(insertionRules[pairIndex][0],str);
-			var _lastMatchPos = 0;
-			for(var matchNumber = 1; matchNumber <= _matches; matchNumber++){
-				//show_debug_message("checking from: " + string(_lastMatchPos));
-				var _insertionPos = string_pos_ext(insertionRules[pairIndex][0],str,_lastMatchPos)+1;
-				array_push(insertions,[insertionRules[pairIndex][1],_insertionPos]);
-				//show_debug_message("Found: " + insertionRules[pairIndex][0] + " at : " + string(_insertionPos-1) + " inserting " + insertionRules[pairIndex][1] + " at " + string(_insertionPos));
-				_lastMatchPos = _insertionPos-1;
-	
-			}
-		}
-		//if (step == 3) continue;
-		//push insertion list
-		for (var _insertion = 0; _insertion < array_length(insertions); _insertion++){
-			var _subStr = insertions[_insertion][0];
-			var _position = insertions[_insertion][1];
-			str = string_insert(_subStr, str, _position);
-			count_character(_subStr);
-			increase_indexes(_insertion, insertions[_insertion][1])
-		}
+		if(_step == 10) get_totals("Part 1: ");
+		if(_step == 40) get_totals("Part 2: ");
 	}
-	
-	//get string count
-	
-	
+
 }
 
-function increase_indexes(_from,_isAbove){
-	for (var _insertion = _from+1; _insertion < array_length(insertions); _insertion++){
-		if(insertions[_insertion][1] >= _isAbove) insertions[_insertion][1]++
+function process_insertion(_array){
+	var _char = _array[0];
+	var _neighbor = _array[1];
+	var _insertion =  _array[2];
+	var _qty = _array[3];
+	
+	if(_insertion == undefined) return 0;
+	else{
+		//check maps exist
+		if (!ds_map_exists(charMap[? _char], _insertion)) add_neighbor(_char, _insertion, 0);
+		if (!ds_map_exists(charMap, _insertion)) add_neighbor(_insertion, _neighbor, 0);
+		if (!ds_map_exists(charMap[? _insertion], _neighbor)) add_neighbor(_insertion, _neighbor, 0);
+				
+		//update maps
+		charMap[? _char][? _neighbor] -= _qty; //remove the neighbor from its pair
+		charMap[? _char][? _insertion] += _qty; //add the insertion as neighbor to the old pair
+		charMap[? _insertion][? _neighbor] += _qty; //add the neighbor to its new pair
 	}
 }
 
-function count_character(_char){
-	if(ds_map_exists(charCount, _char)){
-			charCount[? _char] += 1;
+function get_totals(_part){
+	var _largest = 0;
+	var _smallest = infinity;
+	//loop through charmap
+	var _charMapSize = ds_map_size(charMap);
+	var _char = ds_map_find_first(charMap);
+	repeat(_charMapSize){
+		//show_debug_message("Char: " + _char);
+		//loop through neighbors of char
+		var _charNeighborMapSize = ds_map_size(charMap[? _char])
+		var _neighbor = ds_map_find_first(charMap[? _char]);
+		var _neighborQty = 0;
+		repeat(_charNeighborMapSize){
+			//show_debug_message("Neighbor: " + _neighbor);
+				
+			_neighborQty += charMap[? _char][? _neighbor];
+				
+			//find next neighbor
+			_neighbor = ds_map_find_next(charMap[? _char], _neighbor);
 		}
-		else ds_map_set(charCount, _char, 1);
+		_largest = max(_largest, _neighborQty);
+		_smallest = min(_smallest, _neighborQty);
+		
+		//find next char
+		_char = ds_map_find_next(charMap, _char);
+	}
+	show_debug_message(_part + string(_largest-_smallest));
 }

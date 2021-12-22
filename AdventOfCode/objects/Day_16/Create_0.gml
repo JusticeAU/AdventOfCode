@@ -68,37 +68,88 @@ function day_16(){
 	processed = [];
 	position = 1;
 	length = string_length(bits);
-	finished = false;
+	//finished = false;
 
-	show_debug_message(read_version());
+	repeat(2){
+		array_push(processed,read());
+		position += (position mod 4)+1; //move up to the next 'quad' due to potential hexadecimal buffer
+	}
 }
 
 function read_version(){
 	var _str = string_copy(bits,position,3);
-	switch(_str){
-		case "000":
-			return 0;
+	position += 3;
+	return string_binary_to_decimal(_str);
+}
+	
+function read_type(){
+	var _str = string_copy(bits,position,3);
+	position += 3;
+	return string_binary_to_decimal(_str);
+}
+
+function read_packet_type(_type){
+	switch(_type){
+		case 4: //literal value
+			return read_literal();
 			break;
-		case "001":
-			return 1;
-			break;
-		case "010":
-			return 2;
-			break;
-		case "011":
-			return 3;
-			break;
-		case "100":
-			return 4;
-			break;
-		case "101":
-			return 5;
-			break;
-		case "110":
-			return 6;
-			break;
-		case "111":
-			return 7;
+	
+		default: //operator
+			return read_operator();
 			break;
 	}
+}
+	
+function read_literal(){
+	var _more = 1;
+	var _str = "";
+	do{
+		_more = real(string_copy(bits,position,1));
+		position += 1
+		_str += string_copy(bits,position,4);
+		position += 4;
+	}
+	until(!_more)
+	return string_binary_to_decimal(_str);
+}
+
+function read_operator(){
+	var _lengthType = real(string_copy(bits,position,1));
+	position += 1
+	switch(_lengthType){
+		case 0: //next 15 bits = total length in bits
+			var _str = string_copy(bits,position,15);
+			position+=15;
+			
+			var _length = string_binary_to_decimal(_str);
+			var _subpackets = string_copy(bits,position,_length);
+			position += _length;
+			return _subpackets;
+			break;
+		case 1: //next 11 bits = number of subpackets
+			var _str = string_copy(bits,position,11);
+			position+=11;
+			var _qty = string_binary_to_decimal(_str);
+			break;
+	}
+	
+	
+}
+
+function string_binary_to_decimal(_string){
+	var _decimal = 0;
+	var _length = string_length(_string);
+	for (var i = 1; i <= _length; i++){
+		_decimal = _decimal << 1;
+		if (string_char_at(_string, i) == "1") _decimal = _decimal | 1;
+	}
+	return _decimal;
+}
+
+function read(){
+	var _version = read_version();
+	var _type = read_type();
+	var _data = read_packet_type(_type);
+	return [_version,_type,_data];
+	
 }

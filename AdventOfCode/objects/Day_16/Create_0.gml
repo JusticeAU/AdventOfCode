@@ -87,24 +87,25 @@ function string_binary_to_decimal(_string){
 function decode_int(_bits){
 	var _str = string_copy(bits,position,_bits);
 	position+=_bits;
-	return _str;
+	return string_binary_to_decimal(_str);
 }
 
 function decode_one_packet(){
-	var _version = string_binary_to_decimal(decode_int(3));
-	var _tid = string_binary_to_decimal(decode_int(3));
+	var _version = decode_int(3);
+	var _tid = decode_int(3);
 	var _data = decode_packet_data(_tid);
 	return [_version, _tid, _data];
 }
 
 function decode_value_data(){
 	var _more = true;
-	var _str = ""
+	var _num = 0;
 	while(_more){
-		_more = string_binary_to_decimal(decode_int(1));
-		_str += decode_int(4);
+		_num = _num << 4;
+		_more = decode_int(1);
+		_num += decode_int(4);
 	}
-	return string_binary_to_decimal(_str);
+	return _num;
 }
 
 function decode_n_packets(_n){
@@ -127,8 +128,8 @@ function decode_len_packets(_length){
 function decode_operator_data(){
 	var _ltid = decode_int(1);
 	
-	if (_ltid == 1) return decode_n_packets(string_binary_to_decimal(decode_int(11)));
-	else return decode_len_packets(string_binary_to_decimal(decode_int(15)));
+	if (_ltid == 1) return decode_n_packets(decode_int(11));
+	else return decode_len_packets(decode_int(15));
 }
 
 function decode_packet_data(_tid){

@@ -70,10 +70,10 @@ function day_16(){
 	length = string_length(bits);
 	//finished = false;
 
-	repeat(2){
-		array_push(processed,read());
-		position += (position mod 4)+1; //move up to the next 'quad' due to potential hexadecimal buffer
-	}
+	read();
+		
+	//position += (position mod 4)+1; //move up to the next 'quad' due to potential hexadecimal buffer
+
 }
 
 function read_version(){
@@ -88,52 +88,68 @@ function read_type(){
 	return string_binary_to_decimal(_str);
 }
 
-function read_packet_type(_type){
+function process_packet(_version, _type){
 	switch(_type){
 		case 4: //literal value
-			return read_literal();
+			show_debug_message("Processing literal");
+			var _result = read_literal(_version,_type);
+			show_debug_message("Result of literal processing - digits read: " + string(_result));
+			return _result
 			break;
 	
 		default: //operator
-			return read_operator();
+		show_debug_message("Processing operator");
+			var _result = read_operator(_version,_type);
+			show_debug_message("Result of operator processing - digits read:" + string(_result));	
+			return _result
 			break;
 	}
 }
 	
-function read_literal(){
+function read_literal(_version,_type){
+	var _read = 0;
 	var _more = 1;
 	var _str = "";
 	do{
-		_more = real(string_copy(bits,position,1));
-		position += 1
-		_str += string_copy(bits,position,4);
-		position += 4;
+		_more = real(read_next(1));
+		_str += read_next(4);
+		_read += 5;
+		show_debug_message("Reading Literal: " + _str);
 	}
 	until(!_more)
-	return string_binary_to_decimal(_str);
+	var _value = string_binary_to_decimal(_str);
+	array_push(processed,[_version,_type,_value]);
+	return _read;
 }
 
-function read_operator(){
-	var _lengthType = real(string_copy(bits,position,1));
-	position += 1
+function read_operator(_version,_type){
+	var _totalRead = 0;
+	var _lengthType = real(read_next(1));
+	_totalRead += 1;
+	show_debug_message("Operator Length Type: " + string(_lengthType));
 	switch(_lengthType){
 		case 0: //next 15 bits = total length in bits
-			var _str = string_copy(bits,position,15);
-			position+=15;
-			
+			var _str = read_next(15);
+			_totalRead += 15;
 			var _length = string_binary_to_decimal(_str);
-			var _subpackets = string_copy(bits,position,_length);
-			position += _length;
-			return _subpackets;
+			var _read = 0;
+			show_debug_message("Reading until total length of:  " + string(_length));
+			do{
+				_read += read();
+			}
+			until(_read == _length);
+			_totalRead += _length;
 			break;
+			
 		case 1: //next 11 bits = number of subpackets
-			var _str = string_copy(bits,position,11);
-			position+=11;
+			var _str = read_next(11)
+			_totalRead += 11;
 			var _qty = string_binary_to_decimal(_str);
+			repeat(_qty) read();
 			break;
 	}
-	
-	
+	array_push(processed,[_version,_type,-4]);
+	return _totalRead;
 }
 
 function string_binary_to_decimal(_string){
@@ -147,9 +163,19 @@ function string_binary_to_decimal(_string){
 }
 
 function read(){
+	var _read = 0;
 	var _version = read_version();
 	var _type = read_type();
-	var _data = read_packet_type(_type);
-	return [_version,_type,_data];
+	_read += 6;
+	show_debug_message("Version: " + string(_version));
+	show_debug_message("Type: " + string(_type));
 	
+	_read += process_packet(_version, _type);
+	return _read;
+}
+
+function read_next(_bits){
+	var _str = string_copy(bits,position,_bits);
+	position+=_bits;
+	return _str;
 }

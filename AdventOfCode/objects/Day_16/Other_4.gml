@@ -1,3 +1,3 @@
 /// @description 
-load_input_day_16("C:\\dev\\AdventOfCode\\day16sample.txt")
+load_input_day_16("C:\\dev\\AdventOfCode\\day16.txt")
 day_16();

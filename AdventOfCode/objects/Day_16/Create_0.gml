@@ -5,7 +5,7 @@ function load_input_day_16(_path){
 	bits = "";
 	for(var i = 1; i <= string_length(_line); i++) {
 		var _hex = string_char_at(_line,i);
-		bits += hex_to_binary(_hex);
+		bits += hex_to_binary(_hex); //convert to binary as we're importing.
 	}
 	file_text_close(_file);
 }
@@ -65,91 +65,13 @@ function hex_to_binary(_hex){
 }
 	
 function day_16(){
-	processed = [];
+	
 	position = 1;
 	length = string_length(bits);
-	//finished = false;
-
-	read();
-		
-	//position += (position mod 4)+1; //move up to the next 'quad' due to potential hexadecimal buffer
-
-}
-
-function read_version(){
-	var _str = string_copy(bits,position,3);
-	position += 3;
-	return string_binary_to_decimal(_str);
-}
+	processed = decode_one_packet();
 	
-function read_type(){
-	var _str = string_copy(bits,position,3);
-	position += 3;
-	return string_binary_to_decimal(_str);
-}
-
-function process_packet(_version, _type){
-	switch(_type){
-		case 4: //literal value
-			show_debug_message("Processing literal");
-			var _result = read_literal(_version,_type);
-			show_debug_message("Result of literal processing - digits read: " + string(_result));
-			return _result
-			break;
-	
-		default: //operator
-		show_debug_message("Processing operator");
-			var _result = read_operator(_version,_type);
-			show_debug_message("Result of operator processing - digits read:" + string(_result));	
-			return _result
-			break;
-	}
-}
-	
-function read_literal(_version,_type){
-	var _read = 0;
-	var _more = 1;
-	var _str = "";
-	do{
-		_more = real(read_next(1));
-		_str += read_next(4);
-		_read += 5;
-		show_debug_message("Reading Literal: " + _str);
-	}
-	until(!_more)
-	var _value = string_binary_to_decimal(_str);
-	array_push(processed,[_version,_type,_value]);
-	return _read;
-}
-
-function read_operator(_version,_type){
-	var _totalRead = 0;
-	var _lengthType = real(read_next(1));
-	_totalRead += 1;
-	show_debug_message("Operator Length Type: " + string(_lengthType));
-	switch(_lengthType){
-		case 0: //next 15 bits = total length in bits
-			var _str = read_next(15);
-			_totalRead += 15;
-			var _length = string_binary_to_decimal(_str);
-			var _read = 0;
-			show_debug_message("Reading until total length of:  " + string(_length));
-			do{
-				_read += read();
-			}
-			until(_read == _length);
-			_totalRead += _length;
-			break;
-			
-		case 1: //next 11 bits = number of subpackets
-			var _str = read_next(11)
-			_totalRead += 11;
-			var _qty = string_binary_to_decimal(_str);
-			repeat(_qty) read();
-			break;
-	}
-	array_push(processed,[_version,_type,-4]);
-	return _totalRead;
+	show_debug_message("Part 1: " + string(sum_version(processed)));
+	show_debug_message("Part 2: " + string(evaluate(processed)));
 }
 
 function string_binary_to_decimal(_string){
@@ -162,20 +84,142 @@ function string_binary_to_decimal(_string){
 	return _decimal;
 }
 
-function read(){
-	var _read = 0;
-	var _version = read_version();
-	var _type = read_type();
-	_read += 6;
-	show_debug_message("Version: " + string(_version));
-	show_debug_message("Type: " + string(_type));
-	
-	_read += process_packet(_version, _type);
-	return _read;
-}
-
-function read_next(_bits){
+function decode_int(_bits){
 	var _str = string_copy(bits,position,_bits);
 	position+=_bits;
 	return _str;
+}
+
+function decode_one_packet(){
+	var _version = string_binary_to_decimal(decode_int(3));
+	var _tid = string_binary_to_decimal(decode_int(3));
+	var _data = decode_packet_data(_tid);
+	return [_version, _tid, _data];
+}
+
+function decode_value_data(){
+	var _more = true;
+	var _str = ""
+	while(_more){
+		_more = string_binary_to_decimal(decode_int(1));
+		_str += decode_int(4);
+	}
+	return string_binary_to_decimal(_str);
+}
+
+function decode_n_packets(_n){
+	var _array = [];
+	repeat(_n) array_push(_array, decode_one_packet());
+	return _array;
+}
+
+function decode_len_packets(_length){
+	var _end = position + _length;
+	var _array = [];
+	
+	while(position < _end){
+		array_push(_array,decode_one_packet());
+	}
+	
+	return _array;
+}
+
+function decode_operator_data(){
+	var _ltid = decode_int(1);
+	
+	if (_ltid == 1) return decode_n_packets(string_binary_to_decimal(decode_int(11)));
+	else return decode_len_packets(string_binary_to_decimal(decode_int(15)));
+}
+
+function decode_packet_data(_tid){
+	if (_tid == 4) return decode_value_data();
+	else return decode_operator_data();
+}
+
+function sum_version(_packet){
+	var _tid = _packet[1];
+	var _value = 0;
+	_value += _packet[0];
+	if (_tid != 4){
+		for (var i = 0; i < array_length(_packet[2]); i++){
+			_value += sum_version(_packet[2][i]);
+		}
+	}
+	return _value;
+}
+
+function evaluate(_packet){
+	var _tid = _packet[1];
+	switch(_tid){
+		case 0:
+			return packets_sum(_packet[2]);
+			break;
+		case 1:
+			return packets_product(_packet[2]);
+			break;
+		case 2:
+			return packets_min(_packet[2]);
+			break;
+		case 3:
+			return packets_max(_packet[2]);
+			break;
+		case 4:
+			return _packet[2];
+			break;
+		case 5:
+			return packets_greater(_packet[2]);
+			break;
+		case 6:
+			return packets_less(_packet[2]);
+			break;
+		case 7:
+			return packets_equal(_packet[2]);
+			break;
+	}
+}
+
+function packets_sum(_packet){
+	var _value = 0;
+	for (var i = 0; i < array_length(_packet); i++){
+		var _result = evaluate(_packet[i]);
+		_value += _result
+	}
+	return _value;
+}
+
+function packets_product(_packet){
+	var _value = 0;
+	for (var i = 0; i < array_length(_packet); i++){
+		if (i == 0) _value += evaluate(_packet[i]);
+		else _value *= evaluate(_packet[i])
+	}
+	return _value;
+}
+
+function packets_min(_packet){
+	var _value = infinity;
+	for (var i = 0; i < array_length(_packet); i++){
+		_value = min(_value,evaluate(_packet[i]));
+	}
+	return _value;
+}
+
+function packets_max(_packet){
+	var _value = -1;
+	for (var i = 0; i < array_length(_packet); i++){
+		_value = max(_value, evaluate(_packet[i]));
+	}
+	return _value;
+}
+
+function packets_greater(_packet){
+	return (evaluate(_packet[0]) > evaluate(_packet[1]));
+}
+
+function packets_less(_packet){
+	return (evaluate(_packet[0]) < evaluate(_packet[1]));
+}
+
+function packets_equal(_packet){
+	return (evaluate(_packet[0]) == evaluate(_packet[1]));
 }

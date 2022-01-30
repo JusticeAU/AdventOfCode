@@ -84,7 +84,7 @@ function string_binary_to_decimal(_string){
 	return _decimal;
 }
 
-function decode_int(_bits){
+function decode_int(_bits){ //reads from our bitstring the next n bits, updates our 'global' position.
 	var _str = string_copy(bits,position,_bits);
 	position+=_bits;
 	return string_binary_to_decimal(_str);
@@ -98,13 +98,13 @@ function decode_one_packet(){
 }
 
 function decode_value_data(){
-	var _more = true;
 	var _num = 0;
-	while(_more){
-		_num = _num << 4;
-		_more = decode_int(1);
+	do{
+		var _more = decode_int(1);
 		_num += decode_int(4);
+		if(_more) _num = _num << 4; //if theres more data then our binary string is actually longer than we thought, so we need to shift it across by 4 bits and read the new data
 	}
+	until(!_more)
 	return _num;
 }
 

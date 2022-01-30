@@ -7,5 +7,8 @@ repeat(50)
 	enhancment++;
 	show_debug_message(enhancment);
 }
-var _count = CountLit(image[enhancment])
-show_debug_message(_count);
+
+var _count = CountLit(image[2]);
+show_debug_message("Part 1: " + string(_count));
+var _count = CountLit(image[50]);
+show_debug_message("Part 2: " + string(_count));

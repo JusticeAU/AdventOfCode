@@ -1,27 +1,38 @@
 /// @description
 viewIndex = 0;
+iteration = 1;
 
 enhancementAlgo = "";
-array_size = 110;
-image = array_create(1, array_create(array_size, array_create(array_size, ".")));
-imageBuffer = 5;
+image = [];
 
 function load_input_day_20(_path)
 {
 	var file = file_text_open_read(_path);
+	var init = false;
 	
 	//read in the enhancement string
 	enhancementAlgo = file_text_read_string(file);
 	file_text_readln(file);
 	file_text_readln(file);
+	
 	//read in the grid
 	for(var i = 0; (!file_text_eof(file)); i++) {
 		var _line = file_text_read_string(file);
 		var _end = string_length(_line);
+		
+		//determine size and initialise array
+		if(!init) 
+		{
+			var array_size = _end+4; //padding for 'infinitie'
+			image = array_create(1, array_create(array_size, array_create(array_size, ".")));
+			init = true;
+		}
+		
+		//read data in to array.
 		for (var charPos = 1; charPos <= _end; charPos++)
 		{
 			var _char = string_char_at(_line,charPos);
-			image[0][i+imageBuffer][charPos-1+imageBuffer] = _char;
+			image[0][i+2][charPos-1+2] = _char;
 		}
 		file_text_readln(file); 
 	}
@@ -30,7 +41,7 @@ function load_input_day_20(_path)
 
 function EnhanceImage(_image)
 {
-	var _imageEnhanced = array_create(array_size, array_create(array_size, "."));
+	var _imageEnhanced = NewGrid(_image);
 	
 	for (var _y = 1; _y < array_length(_image)-1; _y++)
 	{
@@ -39,7 +50,7 @@ function EnhanceImage(_image)
 			var _binaryStr = GetBinaryString(_image,_y,_x);
 			var _decStr = string_binary_to_decimal(_binaryStr);
 			var _enhancedPixel = GetEnhancedPixel(_decStr);
-			_imageEnhanced[_y][_x] = _enhancedPixel;
+			_imageEnhanced[_y+1][_x+1] = _enhancedPixel;
 		}
 	}
 	return _imageEnhanced;
@@ -85,4 +96,11 @@ function CountLit(_image)
 		}
 	}
 	return _lit;
+}
+
+function NewGrid(_oldGrid)
+{
+	var _fill = _oldGrid[0][0] == "#" ? "." : "#";
+	var _size = array_length(_oldGrid);
+	return array_create(_size+2, array_create(_size+2, _fill));
 }

@@ -1,11 +1,11 @@
 /// @description 
 load_input_day_20("C:\\dev\\AdventOfCode\\day20.txt");
-var enhancment = 0;
+var enhancement = 0;
 repeat(50)
 {
-	image[enhancment+1] = EnhanceImage(image[enhancment]);
-	enhancment++;
-	show_debug_message(enhancment);
+	image[enhancement+1] = EnhanceImage(image[enhancement]);
+	enhancement++;
+	show_debug_message(enhancement);
 }
 
 var _count = CountLit(image[2]);

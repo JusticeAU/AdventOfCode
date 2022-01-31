@@ -1,9 +1,7 @@
 /// @description
-viewIndex = 0;
-iteration = 1;
-
-enhancementAlgo = "";
-image = [];
+enhancementAlgo = "";	//will contain the algorithm from the input data
+image = [];		//array of 'images'
+viewIndex = 0; //for drawing and browsing iterations of the grid
 
 function load_input_day_20(_path)
 {
@@ -16,7 +14,8 @@ function load_input_day_20(_path)
 	file_text_readln(file);
 	
 	//read in the grid
-	for(var i = 0; (!file_text_eof(file)); i++) {
+	for(var i = 0; (!file_text_eof(file)); i++)
+	{
 		var _line = file_text_read_string(file);
 		var _end = string_length(_line);
 		

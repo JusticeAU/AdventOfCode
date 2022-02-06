@@ -20,9 +20,29 @@ function add_numbers(_index1, _index2)
 
 function reduce_number(_string)
 {
-	var reduced = false;
-	var tooDeep = find_deep_pos(_string);
-	if (tooDeep != -4) _string = explode(_string, tooDeep);
+	var reduced = true;
+	do
+	{
+		reduced = true;
+		var deepest = find_deep_pos(_string);
+		
+		if (deepest != -4)
+		{
+			reduced = false;
+			_string = explode(_string, deepest);
+			continue;
+		}
+		
+		var _split = find_split_index(_string);
+		if (_split != -4)
+		{
+			reduced = false;
+			_string = split(_string, _split);
+			continue;
+		}
+	}
+	until (reduced);
+	
 	return _string;
 }
 
@@ -104,4 +124,47 @@ function get_left_num(_string, _index)
 		if (_num >= 0) return [_num, i];
 	}
 	return [-4,-4];
+}
+
+function split(_string, _numIndex){
+	//get number and split it
+	var _split = real(string_copy(_string, _numIndex, 2));
+	var _num1 = _split div 2;
+	var _num2 = ((_split div 2) + _split mod 2);
+	
+	//build new pair
+	var _pair = ("[" + string(_num1) + "," + string(_num2) + "]");
+	
+	_string = string_replace(_string, _split, _pair);
+	
+	return _string;
+
+}
+
+function find_split_index(_string)
+{
+	for (var i = 1; i <= string_length(_string); i++)
+	{
+		var _char = string_char_at(_string, i);
+		var _num = -4;
+		if (string_length(string_digits(_char)) > 0) _num = string_digits(_char);
+		if (_num >= 0)
+		{
+			//found a number, check for number immediately after
+			var _char2 = string_char_at(_string, i+1);
+			var _num2 = -4;
+			if (string_length(string_digits(_char2)) > 0) _num2 = string_digits(_char2);
+			if (_num2 >= 0)
+			{
+				//found a double digit number
+				return i;
+			}
+		}
+	}
+	return -4;
+}
+
+function find_magnitude(_string)
+{
+	
 }
